@@ -1,0 +1,68 @@
+
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Марсианские пейзажи</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Галерея марсианских ландшафтов</h1>
+
+        <div id="marsCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#marsCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#marsCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#marsCarousel" data-bs-slide-to="2"></button>
+                <button type="button" data-bs-target="#marsCarousel" data-bs-slide-to="3"></button>
+            </div>
+
+            <div class="carousel-inner rounded">
+                <div class="carousel-item active">
+                    <img src="{{ url_for('static', filename='img/mars1.jpg') }}" class="d-block w-100" alt="Марсианский пейзаж 1">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Долина Маринера</h5>
+                        <p>Крупнейший каньон в Солнечной системе</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/mars2.jpg') }}" class="d-block w-100" alt="Марсианский пейзаж 2">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Гора Олимп</h5>
+                        <p>Самая высокая гора в Солнечной системе</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/mars3.jpg') }}" class="d-block w-100" alt="Марсианский пейзаж 3">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Кратер Гейла</h5>
+                        <p>Место работы марсохода Curiosity</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/mars4.jpg') }}" class="d-block w-100" alt="Марсианский пейзаж 4">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Северная полярная шапка</h5>
+                        <p>Состоит из водяного льда и замерзшего углекислого газа</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#marsCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#marsCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="lead">Исследуйте удивительные марсианские ландшафты</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
