@@ -1,0 +1,22 @@
+{
+  "crew": [
+    {
+      "first_name": "Иван",
+      "last_name": "Петров",
+      "photo": "img/mars1.jpg",
+      "specialties": ["Капитан", "Навигатор", "Врач"]
+    },
+    {
+      "first_name": "Анна",
+      "last_name": "Сидорова",
+      "photo": "img/mars2.jpg",
+      "specialties": ["Инженер", "Пилот", "Техник"]
+    },
+    {
+      "first_name": "Дмитрий",
+      "last_name": "Козлов",
+      "photo": "img/mars3.jpg",
+      "specialties": ["Бортмеханик", "Связист", "Штурман"]
+    }
+  ]
+}
