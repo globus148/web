@@ -1,17 +1,30 @@
 {% extends "base.html" %}
+
 {% block content %}
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Экипаж корабля</title>
-</head>
-<body>
-<div class="crew_member">
-    <h1>{{member.first_name}} {{member.last_name}}</h1>
-    <img src="{{ url_for('static', filename=member.photo) }}" width="70%">
-    <h2>Специальности: {{member.speciality}}</h2>
+<h1>Список работ</h1>
+{% for job in jobs %}
+<div class="col-md6 border rounded">
+    <h2>Работа #{{ job.id }}</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название работы</th>
+                <th>Ответственный</th>
+                <th>Продолжительность (часы)</th>
+                <th>Команда</th>
+                <th>Завершена</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ job.job }}</td>
+                <td>{{ job.team_leader_user.surname }} {{ job.team_leader_user.name }}</td>
+                <td>{{ job.work_size }}</td>
+                <td>{{ job.colloborators }}</td>
+                <td>{% if job.if_finished %}Да{% else %}Нет{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
 </div>
-</body>
-</html>
+{% endfor %}
 {% endblock %}
