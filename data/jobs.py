@@ -13,5 +13,5 @@ class Jobs(SqlAlchemyBase):
     colloborators = Column(String)
     start_date = Column(DateTime)
     end_date = Column(DateTime)
-    if_finished = Column(Boolean)
+    is_finished = Column(Boolean)
     team_leader_user = relationship("User")
