@@ -10,6 +10,8 @@ from data.register_form import RegisterForm
 from data.jobs_form import JobsForm
 from data.jobs import Jobs
 from datetime import datetime
+from data.departament_form import DepartamentForm
+from data.departament import Departament
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -247,6 +249,87 @@ def delete_work(id):
     return redirect('/works')
 
 
+@app.route("/departaments")
+def departaments_list():
+    db_sess = db_session.create_session()
+    departaments = db_sess.query(Departament).all()
+    return render_template("departament_list.html",
+                           title="Список департаментов", departaments=departaments)
+
+
+@app.route("/add_departament", methods=["GET", "POST"])
+@login_required
+def add_departament():
+    form = DepartamentForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        departament = Departament(title=form.title.data,
+                                  chief=form.chief.data,
+                                  members=form.members.data,
+                                  email=form.email.data)
+        db_sess.add(departament)
+        db_sess.commit()
+        return redirect("/departaments")
+    return render_template("add_departament.html", title="Добавление департамента",
+                           form=form)
+
+
+@app.route('/edit_departament/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_departament(id):
+    db_sess = db_session.create_session()
+    departament = db_sess.query(Departament).filter(Departament.id == id).first()
+
+    # Проверка прав доступа
+    if not departament or (current_user.id != departament.chief and current_user.id != 1):
+        abort(403)
+
+    form = DepartamentForm()
+
+    if request.method == 'GET':
+        if departament:
+            form.title.data = departament.title
+            form.chief.data = departament.chief
+            form.members.data = departament.members
+            form.email.data = departament.email
+        else:
+            abort(404)
+
+    if form.validate_on_submit():
+        if departament:
+            departament.title = form.title.data
+            departament.chief = form.chief.data
+            departament.members = form.members.data
+            departament.email = form.email.data
+            db_sess.commit()
+            return redirect('/departaments')
+        else:
+            abort(404)
+
+    return render_template('add_departament.html',
+                           title='Редактирование департамента',
+                           form=form)
+
+
+@app.route('/delete_departament/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_departament(id):
+    db_sess = db_session.create_session()
+    departament = db_sess.query(Departament).filter(Departament.id == id).first()
+
+    # Проверка прав доступа
+    if not departament or (current_user.id != departament.chief and current_user.id != 1):
+        abort(403)
+
+    if departament:
+        db_sess.delete(departament)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/departaments')
+
+
 if __name__ == '__main__':
     global_init("db/blogs.db")
     app.run(port=8080, host="127.0.0.1")
+

@@ -1,0 +1,49 @@
+{%extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Список департаментов</h1>
+    {% if current_user.is_authenticated %}
+    <a href="/add_departament" class="btn btn-primary mb-4"> Добавить департамент</a>
+    <a href="/works" class="btn btn-primary mb-4"> Перейти к Работам</a>
+    {% endif %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Руководитель</th>
+                    <th>Участники</th>
+                    <th>Email</th>
+                    {% if current_user.is_authenticated %}
+                        <th>Действия</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for departament in departaments %}
+                <tr>
+                    <td>{{ departament.id }}</td>
+                    <td>{{ departament.title }}</td>
+                    <td>{{ departament.chief_user.name if departament.chief_user else departament.chief }}</td>
+                    <td>{{ departament.members }}</td>
+                    <td>{{ departament.email }}</td>
+                    {% if current_user.is_authenticated and (current_user.id == departament.chief or current_user.id == 1) %}
+                    <td>
+                        <a href="/edit_departament/{{ departament.id }}" class="btn btn-warning btn-sm me-1">
+                            Редактировать
+                        </a>
+                        <a href="/delete_departament/{{ departament.id }}" class="btn btn-danger btn-sm"
+                           onclick="return confirm('Вы уверены, что хотите удалить этот департамент?')">
+                            Удалить
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
