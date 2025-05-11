@@ -10,6 +10,7 @@ from data.register_form import RegisterForm
 from data.jobs_form import JobsForm
 from data.jobs import Jobs
 from datetime import datetime
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
@@ -167,11 +168,76 @@ def add_work():
         return redirect('/works')
     return render_template('add_work.html', title='Добавление работы', form=form)
 
+
 @app.route('/delete_work/<int:id>', methods=['GET', 'POST'])
 @login_required
 def delete_work(id):
     db_sess = db_session.create_session()
     work = db_sess.query(Jobs).filter(Jobs.id == id).first()
+
+    if work:
+        db_sess.delete(work)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/works')
+
+
+@app.route('/edit_work/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_work(id):
+    db_sess = db_session.create_session()
+    work = db_sess.query(Jobs).filter(Jobs.id == id).first()
+
+    # Проверка прав доступа
+    if not work or (current_user.id != work.team_leader and current_user.id != 1):  # 1 - ID капитана
+        abort(403)  # Доступ запрещен
+
+    form = JobsForm()
+
+    if request.method == 'GET':
+        if work:
+            form.team_leader.data = work.team_leader
+            form.job.data = work.job
+            form.work_size.data = work.work_size
+            form.collaborators.data = work.collaborators
+            form.start_date.data = work.start_date.strftime('%Y-%m-%d %H:%M') if work.start_date else None
+            form.end_date.data = work.end_date.strftime('%Y-%m-%d %H:%M') if work.end_date else None
+            form.is_finished.data = work.is_finished
+        else:
+            abort(404)
+
+    if form.validate_on_submit():
+        if work:
+            work.team_leader = form.team_leader.data
+            work.job = form.job.data
+            work.work_size = form.work_size.data
+            work.collaborators = form.collaborators.data
+            work.start_date = datetime.strptime(form.start_date.data,
+                                                '%Y-%m-%d %H:%M') if form.start_date.data else None
+            work.end_date = datetime.strptime(form.end_date.data, '%Y-%m-%d %H:%M') if form.end_date.data else None
+            work.is_finished = form.is_finished.data
+            db_sess.commit()
+            return redirect('/works')
+        else:
+            abort(404)
+
+    return render_template('add_work.html',
+                           title='Редактирование работы',
+                           form=form)
+
+
+app.route('/delete_work/<int:id>', methods=['GET', 'POST'])
+
+
+@login_required
+def delete_work(id):
+    db_sess = db_session.create_session()
+    work = db_sess.query(Jobs).filter(Jobs.id == id).first()
+
+    # Проверка прав доступа
+    if not work or (current_user.id != work.team_leader and current_user.id != 1):
+        abort(403)
 
     if work:
         db_sess.delete(work)

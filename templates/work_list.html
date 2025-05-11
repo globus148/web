@@ -5,47 +5,50 @@
     <h1 class="my-4">Список работ</h1>
 
     {% if current_user.is_authenticated %}
-        <a href="/add_work" class="btn btn-primary mb-4">Добавить работу</a>
+    <a href="/add_work" class="btn btn-primary mb-4">Добавить работу</a>
     {% endif %}
 
     <div class="table-responsive">
         <table class="table table-striped">
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Руководитель</th>
-                    <th>Описание</th>
-                    <th>Часы</th>
-                    <th>Участники</th>
-                    <th>Начало</th>
-                    <th>Окончание</th>
-                    <th>Статус</th>
-                    {% if current_user.is_authenticated %}
-                        <th>Действия</th>
-                    {% endif %}
-                </tr>
+            <tr>
+                <th>ID</th>
+                <th>Руководитель</th>
+                <th>Описание</th>
+                <th>Часы</th>
+                <th>Участники</th>
+                <th>Начало</th>
+                <th>Окончание</th>
+                <th>Статус</th>
+                {% if current_user.is_authenticated %}
+                <th>Действия</th>
+                {% endif %}
+            </tr>
             </thead>
             <tbody>
-                {% for work in works %}
-                <tr>
-                    <td>{{ work.id }}</td>
-                    <td>{{ work.team_leader_user.name if work.team_leader_user else work.team_leader }}</td>
-                    <td>{{ work.job }}</td>
-                    <td>{{ work.work_size }}</td>
-                    <td>{{ work.collaborators }}</td>
-                    <td>{{ work.start_date.strftime('%d.%m.%Y %H:%M') if work.start_date else '' }}</td>
-                    <td>{{ work.end_date.strftime('%d.%m.%Y %H:%M') if work.end_date else '' }}</td>
-                    <td>{{ 'Завершена' if work.is_finished else 'В процессе' }}</td>
-                    {% if current_user.is_authenticated %}
-                        <td>
-                            <a href="/delete_work/{{ work.id }}" class="btn btn-danger btn-sm"
-                               onclick="return confirm('Вы уверены, что хотите удалить эту работу?')">
-                                Удалить
-                            </a>
-                        </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
+            {% for work in works %}
+            <tr>
+                <td>{{ work.id }}</td>
+                <td>{{ work.team_leader_user.name if work.team_leader_user else work.team_leader }}</td>
+                <td>{{ work.job }}</td>
+                <td>{{ work.work_size }}</td>
+                <td>{{ work.collaborators }}</td>
+                <td>{{ work.start_date.strftime('%d.%m.%Y %H:%M') if work.start_date else '' }}</td>
+                <td>{{ work.end_date.strftime('%d.%m.%Y %H:%M') if work.end_date else '' }}</td>
+                <td>{{ 'Завершена' if work.is_finished else 'В процессе' }}</td>
+                {% if current_user.is_authenticated and (current_user.id == work.team_leader or current_user.id == 1) %}
+                <td>
+                    <a href="/edit_work/{{ work.id }}" class="btn btn-warning btn-sm me-1">
+                        Редактировать
+                    </a>
+                    <a href="/delete_work/{{ work.id }}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Вы уверены, что хотите удалить эту работу?')">
+                        Удалить
+                    </a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>
