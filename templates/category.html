@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Works log</h1>
+    {% if current_user.is_authenticated %}
+    <a href="/add_category" class="btn btn-primary mb-4"> Добавить Категорию</a>
+    {% endif %}
+
+     <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    Категории работ
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for category in categories %}
+                    <li class="list-group-item">
+                        <a href="/category/{{ category.id }}/add_job" class="text-decoration-none">
+                            {{ category.name }}
+                        </a>
+                        <span class="badge bg-primary rounded-pill float-end">
+                            {{ category.jobs|length }}
+                        </span>
+                        {% if current_user.is_authenticated and category.jobs %}
+                        <div class="mt-2">
+                            <small>
+                                {% for job in category.jobs %}
+                                <div>
+                                    {{ job.job }}
+                                    <a href="/category/{{ category.id }}/remove_job/{{ job.id }}"
+                                       class="text-danger text-decoration-none"
+                                       title="Удалить из категории">×</a>
+                                </div>
+                                {% endfor %}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Описание</th>
+                            <th>Руководитель</th>
+                            <th>Категории</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for work in works %}
+                        <tr>
+                            <td>{{ work.job }}</td>
+                            <td>{{ work.team_leader_user.name }}</td>
+                            <td>
+                                {% for category in work.categories %}
+                                <span class="badge bg-secondary">{{ category.name }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if work.is_finished %}
+                                <span class="badge bg-success">Завершена</span>
+                                {% else %}
+                                <span class="badge bg-warning">В процессе</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

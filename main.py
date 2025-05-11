@@ -12,6 +12,10 @@ from data.jobs import Jobs
 from datetime import datetime
 from data.departament_form import DepartamentForm
 from data.departament import Departament
+from data.category import Category
+from data.category_form import CategoryForm
+from data.job_category import JobCategory
+from sqlalchemy.orm import joinedload
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -20,21 +24,39 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+@app.route("/")
+def category():
+    db_sess = db_session.create_session()
+    if current_user.is_authenticated:
+        works = db_sess.query(Jobs).filter(
+            (Jobs.team_leader == current_user.id) | (Jobs.is_finished == False)
+        )
+    else:
+        works = db_sess.query(Jobs).filter(Jobs.is_finished == False)
+
+    categories = db_sess.query(Category).options(
+        joinedload(Category.jobs)
+    ).all()
+    return render_template("category.html",
+                         works=works,
+                         categories=categories)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
 
-@app.route("/")
-def index():
+@app.route("/viev_news")
+def viev_news():
     db_sess = db_session.create_session()
     if current_user.is_authenticated:
         news = db_sess.query(News).filter(
             (News.user == current_user) | (News.is_private == False))
     else:
         news = db_sess.query(News).filter(News.is_private == False)
-    return render_template("index.html", news=news)
+    return render_template("viev_news.html", news=news)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -70,8 +92,8 @@ def add_news():
         news.user_id = current_user.id
         db_sess.add(news)
         db_sess.commit()
-        return redirect('/')
-    return render_template('news.html', title='Добавление новости', form=form)
+        return redirect('/viev_news')
+    return render_template('add_news.html', title='Добавление новости', form=form)
 
 
 @app.route('/news/<int:id>', methods=['GET', 'POST'])
@@ -95,10 +117,10 @@ def edit_news(id):
             news.content = form.content.data
             news.is_private = form.is_private.data
             db_sess.commit()
-            return redirect('/')
+            return redirect('/viev_news')
         else:
             abort(404)
-    return render_template('news.html', title='Редактирование новости', form=form)
+    return render_template('add_news.html', title='Редактирование новости', form=form)
 
 
 @app.route('/news_delete/<int:id>', methods=['GET', 'POST'])
@@ -111,7 +133,7 @@ def news_delete(id):
         db_sess.commit()
     else:
         abort(404)
-    return redirect('/')
+    return redirect('/viev_news')
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -329,7 +351,97 @@ def delete_departament(id):
     return redirect('/departaments')
 
 
+@app.route('/add_category', methods=['GET', 'POST'])
+@login_required
+def add_category():
+    form = CategoryForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        category = Category(
+            name=form.name.data,
+            description=form.description.data
+        )
+        db_sess.add(category)
+        db_sess.commit()
+        return redirect('/')
+    return render_template('add_category.html',
+                           title='Добавление категории',
+                           form=form)
+
+
+@app.route('/assign_category/<int:job_id>', methods=['GET', 'POST'])
+@login_required
+def assign_category(job_id):
+    db_sess = db_session.create_session()
+    job = db_sess.query(Jobs).get(job_id)
+    categories = db_sess.query(Category).all()
+
+    if request.method == 'POST':
+        category_id = request.form.get('category_id')
+        if category_id:
+            # Удаляем все текущие связи
+            db_sess.query(JobCategory).filter(JobCategory.job_id == job_id).delete()
+            # Добавляем новые
+            for cat_id in request.form.getlist('category_id'):
+                jc = JobCategory(job_id=job_id, category_id=cat_id)
+                db_sess.add(jc)
+            db_sess.commit()
+            return redirect('/')
+
+    return render_template('assign_category.html',
+                           job=job,
+                           categories=categories)
+
+
+@app.route('/category/<int:category_id>/add_job', methods=['GET', 'POST'])
+@login_required
+def add_job_to_category(category_id):
+    db_sess = db_session.create_session()
+    category = db_sess.query(Category).get(category_id)
+
+    if not category:
+        abort(404)
+
+    if request.method == 'POST':
+        job_id = request.form.get('job_id')
+        if job_id:
+            # Проверяем, нет ли уже такой связи
+            existing = db_sess.query(JobCategory).filter(
+                JobCategory.job_id == job_id,
+                JobCategory.category_id == category_id
+            ).first()
+
+            if not existing:
+                jc = JobCategory(job_id=job_id, category_id=category_id)
+                db_sess.add(jc)
+                db_sess.commit()
+            return redirect('/')
+
+    # Получаем работы, которые еще не в этой категории
+    jobs_in_category = [job.id for job in category.jobs]
+    available_jobs = db_sess.query(Jobs).filter(~Jobs.id.in_(jobs_in_category)).all()
+
+    return render_template('assign_job_to_category.html',
+                           category=category,
+                           available_jobs=available_jobs)
+
+
+@app.route('/category/<int:category_id>/remove_job/<int:job_id>')
+@login_required
+def remove_job_from_category(category_id, job_id):
+    db_sess = db_session.create_session()
+    jc = db_sess.query(JobCategory).filter(
+        JobCategory.job_id == job_id,
+        JobCategory.category_id == category_id
+    ).first()
+
+    if jc:
+        db_sess.delete(jc)
+        db_sess.commit()
+
+    return redirect('/')
+
+
 if __name__ == '__main__':
     global_init("db/blogs.db")
     app.run(port=8080, host="127.0.0.1")
-

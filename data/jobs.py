@@ -14,4 +14,6 @@ class Jobs(SqlAlchemyBase):
     start_date = Column(DateTime)
     end_date = Column(DateTime)
     is_finished = Column(Boolean)
+
     team_leader_user = relationship("User")
+    categories = relationship("Category", secondary="job_category", backref="job_relations")

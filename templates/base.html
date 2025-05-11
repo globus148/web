@@ -7,6 +7,21 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
+    <style>
+        .btn-gray {
+            background-color: #6c757d;
+            color: white;
+            border-color: #6c757d;
+            transition: all 0.3s ease;
+        }
+        .btn-gray:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+    </style>
     <title>{{title}}</title>
 </head>
 <body>
@@ -16,6 +31,14 @@
             <a class="navbar-brand" href="#">
                 <h1 class="mb-0">Миссия колонизация Марса</h1>
             </a>
+            {% if current_user.is_authenticated %}
+            <p align="center">
+                <a href="/" class="btn btn-gray mb-4"> Перейти к Категориям</a>
+                <a href="/works" class="btn btn-gray mb-4"> Перейти к Работам</a>
+                <a href="/viev_news" class="btn btn-gray mb-4"> Перейти к Новостям</a>
+                <a href="/departaments" class="btn btn-gray mb-4"> Перейти к Департаментам</a>
+            </p>
+            {% endif %}
             <div class="d-flex align-items-center">
                 {% if current_user.is_authenticated %}
                 <span class="me-3">Пользователь: <B>{{ current_user.name }} &nbsp;</B></span>
